@@ -17,5 +17,3 @@ COPY --from=0 /usr/local/src/avr-rust /usr/local/src/avr-rust
 RUN apt-get update && apt-get install -y avr-libc
 RUN rustup toolchain link avr-toolchain /opt/avr-rust
 RUN cargo install xargo
-RUN git clone https://github.com/avr-rust/blink.git /tmp/blink
-RUN cd /tmp/blink && XARGO_RUST_SRC=/usr/local/src/avr-rust rustup run avr-toolchain xargo build --target avr-atmega328p --release
