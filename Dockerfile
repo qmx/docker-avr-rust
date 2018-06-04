@@ -11,9 +11,26 @@ RUN cd /usr/local/src && mkdir build && cd build && ../avr-rust/configure --enab
 RUN cd /usr/local/src/build && make
 RUN cd /usr/local/src/build && make install
 
-FROM rustlang/rust:nightly
-COPY --from=0 /opt/avr-rust /opt/avr-rust
-COPY --from=0 /usr/local/src/avr-rust /usr/local/src/avr-rust
+ENV RUSTUP_HOME=/usr/local/rustup \
+    CARGO_HOME=/usr/local/cargo \
+    PATH=/usr/local/cargo/bin:$PATH \
+    RUST_NIGHTLY_VERSION=2017-09-24 \
+    XARGO_VERSION=0.3.10
+
+RUN set -eux; \
+    \
+    url="https://static.rust-lang.org/rustup/dist/x86_64-unknown-linux-gnu/rustup-init"; \
+    wget "$url"; \
+    chmod +x rustup-init; \
+    ./rustup-init -y --no-modify-path --default-toolchain nightly-$RUST_NIGHTLY_VERSION; \
+    rm rustup-init; \
+    chmod -R a+w $RUSTUP_HOME $CARGO_HOME; \
+    rustup --version; \
+    cargo --version; \
+    rustc --version;
+
+RUN rustup install nightly
+
 RUN apt-get update && apt-get install -y avr-libc
 RUN rustup toolchain link avr-toolchain /opt/avr-rust
-RUN cargo install xargo
+RUN cargo install xargo --vers $XARGO_VERSION
